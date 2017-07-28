@@ -26,12 +26,12 @@
     mapboxgl.accessToken = 'pk.eyJ1IjoiY2hhaXRhbnlhZyIsImEiOiJjajU3cjV4N2Uwcnd5MndwM25ibGppZTEwIn0.FvTnpRm0QuQltADauDuSkQ'; // replace this with your access token
     var map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/chaitanyag/cj5j4sa6r0bii2rl6v4d6ocyp' // replace this with your style URL
+      style: 'mapbox://styles/chaitanyag/cj5j5dmfz0c0f2ss7r87cm2z6' // replace this with your style URL
     });
     // code from the next step will go here
 	map.on('click', function(e) {
   var features = map.queryRenderedFeatures(e.point, {
-    layers: ['chicago-parks'] // replace this with the name of the layer
+    layers: ['budget'] // replace this with the name of the layer
   });
 
   if (!features.length) {
@@ -42,7 +42,7 @@
 
   var popup = new mapboxgl.Popup({ offset: [0, -15] })
     .setLngLat(feature.geometry.coordinates)
-    .setHTML('<h3>' + feature.properties.title + '</h3><p>' + feature.properties.description + '</p>')
+    .setHTML('<h3>' + feature.properties.ProjectName + '</h3><p>' + feature.properties.Category + '</p>')
     .setLngLat(feature.geometry.coordinates)
     .addTo(map);
 });
