@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+    <head>  
+        <meta charset='utf-8' />
+        <title>Test Mapbox</title>
+        <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+        <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.31.0/mapbox-gl.js'></script>
+        <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.31.0/mapbox-gl.css' rel='stylesheet' />
+        <link href='https://www.mapbox.com/base/latest/base.css' rel='stylesheet' />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <style>
+            body {
+            margin: 0;
+            padding: 0;
+            }
+
+            h2,
+            h3 {
+            margin: 10px;
+            font-size: 1.2em;
+            }
+
+            h3 {
+            font-size: 1em;
+            }
+
+            p {
+            font-size: 0.85em;
+            margin: 10px;
+            text-align: left;
+            }
+
+            /**
+            * Create a position for the map
+            * on the page */
+            #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            }
+
+            /**
+            * Set rules for how the map overlays
+            * (info box and legend) will be displayed
+            * on the page. */
+            .map-overlay {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.616);
+            margin-right: 20px;
+            font-family: Arial, sans-serif;
+            overflow: auto;
+            border-radius: 3px;
+            }
+
+            .mapboxgl-popup-content {
+            text-align: center;
+            font-family: 'Open Sans', sans-serif;
+            background: rgba(255, 255, 255, 0.678);
+            border-radius: 10px;
+            }
+
+            #features {
+            top: 0;
+            height: 150px;
+            margin-top: 20px;
+            width: auto;
+            }
+
+            #legend {
+            display: inline-block;
+            padding: 10px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            line-height: 18px;
+            margin-bottom: 40px;
+            }
+
+            .legend-key {
+            display: inline-block;
+            border-radius: 20%;
+            width: 10px;
+            height: 10px;
+            margin-right: 5px;
+            }
+
+            #fly {
+            display: block;
+            position: absolute;
+            margin: 9.5px;
+            margin-top: 90px;
+            width: 30px;
+            height: 30px;
+            padding: 0px;
+            border: none;
+            border-radius: 5px;
+            font-size: 12px;
+            text-align: center;
+            color: black;
+            background: #fff;
+            box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2), 0 1px 25px 0 rgba(0, 0, 0, 0.19);
+            }
+
+            #fly:hover {
+                background: rgb(229, 227, 231);    
+            }
+
+            @media (max-width:550px) {
+                #legend {
+                font-size: 10px !important;
+                }
+                #map {
+                    width: 100%;    
+                }
+            }
+
+        </style>
+    </head>
+    <body>  
+        <div id='map'></div>
+        <br/>
+        <div class='mapboxgl-ctrl mapboxgl-ctrl-group'><button class='icon rotate' id='fly'></button></div>
+        <div class='map-overlay' id='legend'></div>
+        <script>
+            mapboxgl.accessToken = 'pk.eyJ1IjoiY2hhaXRhbnlhLWd1bmRlYm9pbmEiLCJhIjoiY2pmajViNGtkMDFjMTJ3bzY1a2c1bnJseiJ9.DrXwtCAlBS-tFO1_0SiivA';
+            var map = new mapboxgl.Map({
+                container: 'map', // container id
+                style: 'mapbox://styles/chaitanya-gundeboina/cjfkj79un00mm2sp50bn8zywl' // replace this with your style URL
+            });
+            document.getElementById('fly').addEventListener('click', function () {
+                map.flyTo({
+                    center: [149, -32.8],
+                    zoom: 5.5
+                });
+            });
+            map.on('load', () => {
+                const layers = ['Government Services', 'Police and Justice', 'Utilities', 'Health', 'Roads', 'Transport', 'Community Services', 'Education'];
+                const colors = ['#E377A5', '#2E3192', '#92C5EB', 'hsla(358, 85%, 52%, 0.96)', 'hsla(16, 88%, 54%, 0.76)', '#2484C6', '#488645', '#FFCB05'];
+                for (i = 0; i < layers.length; i++) {
+                    var layer = layers[i];
+                    var color = colors[i];
+                    var item = document.createElement('div');
+                    var key = document.createElement('span');
+                    key.className = 'legend-key';
+                    key.style.backgroundColor = color;
+
+                    var value = document.createElement('span');
+                    value.innerHTML = layer;
+                    item.appendChild(key);
+                    item.appendChild(value);
+                    legend.appendChild(item);
+                }
+
+                map.on('click', function(e) {
+                    var features = map.queryRenderedFeatures(e.point, {
+                        layers: ['budgettest'] // replace this with the name of the layer
+                    });
+                    if (!features.length) {
+                        return;
+                    }
+                    var feature = features[0];
+                    var popup = new mapboxgl.Popup({ offset: [0, -15] })
+                        .setLngLat(feature.geometry.coordinates)
+                        .setHTML('<h3><strong> Project Name: ' + feature.properties.ProjectName + '</strong></h3>'
+                            + '<h3><strong><em> Category: ' + feature.properties.Category + '</em></strong></h3>'
+                            + '<h3><em> Status: ' + feature.properties.Status + '</em></h3>'
+                            + '<h3><em> AgencyName: ' + feature.properties.AgencyName + '</em></h3>')
+                        .addTo(map);
+                });
+
+                map.on('moveend', function(){
+                    var mapExtentFeatures = map.queryRenderedFeatures({layers:['budgettest']}); // replace this with the name of the layer
+                    console.log(mapExtentFeatures);          
+                });
+                //map.getCanvas().style.cursor = 'default';
+
+                // Add zoom and rotation controls to the map.
+                var nav = new mapboxgl.NavigationControl();
+                map.addControl(nav, 'top-left');
+            });          
+        </script>
+    </body>
+</html>
